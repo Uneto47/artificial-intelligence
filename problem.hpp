@@ -9,9 +9,6 @@ using namespace std;
 class Problem {
 public:
   struct State {
-    bool operator==(const State& other) const {
-            return this == &other;
-        }
     struct Hash {
       size_t operator()(const State &state) const;
     };

@@ -14,6 +14,7 @@ struct KnightsTravailsProblem : Problem {
     pair<int, int> position;
 
     State(int x, int y) { this->position = {x, y}; }
+    State(pair<int, int> position) { this->position = position; }
 
     struct Hash : Problem::State::Hash {
       size_t operator()(const State &state) const {
