@@ -3,6 +3,6 @@
 
 #include "problem.hpp"
 
-vector<Problem::State> astar(Problem problem);
+vector<State> astar(Problem problem);
 
 #endif

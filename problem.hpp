@@ -2,19 +2,20 @@
 #define PROBLEM_HPP
 
 #include <cstddef>
-#include <memory>
 #include <vector>
 using namespace std;
 
-class Problem {
-public:
-  struct State {
-    struct Hash {
-      size_t operator()(const State &state) const;
-    };
-  };
-  struct Action {};
+struct State {
+  size_t operator==(const State &rhs) const;
+};
 
+struct StateHash {
+  size_t operator()(const State &state) const;
+};
+
+struct Action {};
+
+struct Problem {
   State initial;
   State goal;
 
@@ -23,22 +24,6 @@ public:
   int heuristics(const State &next);
   bool goal_test(const State &current);
   vector<Action> actions(const State &current);
-};
-
-struct Node {
-  Problem::State state;
-  shared_ptr<Node> parent;
-  int cost;
-
-  Node(Problem::State state, shared_ptr<Node> parent, int cost)
-      : state(state), parent(parent), cost(cost) {}
-
-  struct Comparator {
-    bool operator()(const shared_ptr<Node> lhs,
-                    const shared_ptr<Node> rhs) const {
-      return lhs->cost > rhs->cost;
-    }
-  };
 };
 
 #endif
