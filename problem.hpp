@@ -6,8 +6,7 @@
 #include <vector>
 using namespace std;
 
-class Problem {
-public:
+struct Problem {
   struct State {
     struct Hash {
       size_t operator()(const State &state) const;
