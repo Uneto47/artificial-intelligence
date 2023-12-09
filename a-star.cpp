@@ -1,31 +1,25 @@
-#include "problem.hpp"
-#include <algorithm>
-#include <memory>
-#include <queue>
-#include <unordered_map>
-#include <vector>
-using namespace std;
+#include "a-star.hpp"
 
-vector<Problem::State> astar(Problem problem) {
-  priority_queue<shared_ptr<Node>, vector<shared_ptr<Node>>, Node::Comparator>
+std::vector<Problem::State> AStar::astar(Problem problem) {
+  std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, Node::Comparator>
       frontier;
-  frontier.push(make_shared<Node>(problem.initial, nullptr, 0));
+  frontier.push(std::make_shared<Node>(problem.initial, nullptr, 0));
 
-  unordered_map<Problem::State, shared_ptr<Node>, Problem::State::Hash>
+  std::unordered_map<Problem::State, std::shared_ptr<Node>, Problem::State::Hash>
       explored;
 
   while (!frontier.empty()) {
-    shared_ptr<Node> current = frontier.top();
+    std::shared_ptr<Node> current = frontier.top();
     frontier.pop();
 
     if (problem.goal_test(current->state)) {
-      vector<Problem::State> path;
+      std::vector<Problem::State> path;
       auto node = current;
       while (node != nullptr) {
         path.push_back(node->state);
         node = node->parent;
       }
-      reverse(path.begin(), path.end());
+      std::reverse(path.begin(), path.end());
       return path;
     }
 
@@ -35,7 +29,7 @@ vector<Problem::State> astar(Problem problem) {
       auto cost = problem.path_cost(current->state, action, next);
       if (explored.find(next) == explored.end() || cost < explored[next]->cost)
         frontier.push(
-            make_shared<Node>(next, current, cost + problem.heuristics(next)));
+            std::make_shared<Node>(next, current, cost + problem.heuristics(next)));
     }
   }
 
