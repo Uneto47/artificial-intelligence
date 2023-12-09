@@ -18,7 +18,8 @@ struct Problem {
   State goal;
 
   State result(const State &state, const Action &action);
-  int path_cost(const State &current, const Action &action, const State &next);
+  int path_cost(const int current_cost, const State &current,
+                const Action &action, const State &next);
   int heuristics(const State &next);
   bool goal_test(const State &current);
   vector<Action> actions(const State &current);
