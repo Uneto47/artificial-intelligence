@@ -12,10 +12,6 @@ using namespace std;
 
 // Problem interface implementation
 struct State {
-  friend ostream &operator<<(ostream &os, const State &state) {
-    os << "blank";
-    return os;
-  }
   size_t operator==(const State &rhs) const { return 0; }
 };
 
@@ -45,11 +41,6 @@ const vector<pair<int, int>> VALID_MOVES = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1},
 
 struct KnightsTravailsState : State {
   pair<int, int> position;
-
-  friend ostream &operator<<(ostream &os, const KnightsTravailsState &state) {
-    os << state.position.first << ',' << state.position.second;
-    return os;
-  }
 
   size_t operator==(const KnightsTravailsState &rhs) const {
     return this->position.first == rhs.position.first &&
@@ -92,7 +83,7 @@ struct KnightsTravailsProblem : Problem {
 
   int heuristics(const KnightsTravailsState &next) {
     return abs(next.position.first - goal.position.first) +
-           abs(next.position.second - goal.position.second) - 1;
+           abs(next.position.second - goal.position.second);
   }
 
   bool goal_test(const KnightsTravailsState &current) {
