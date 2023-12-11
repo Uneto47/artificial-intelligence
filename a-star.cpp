@@ -108,7 +108,7 @@ struct KnightsTravailsProblem : Problem {
       int x = move.first + position.first;
       int y = move.second + position.second;
       if (at_bounds(x, y))
-        valid_actions.push_back(KnightsTravailsAction(x, y));
+        valid_actions.push_back(KnightsTravailsAction(move));
     }
 
     return valid_actions;
@@ -153,7 +153,6 @@ vector<StateType> astar(ProblemType problem) {
   while (!frontier.empty()) {
     shared_ptr<Node<StateType>> current = frontier.top();
     frontier.pop();
-    cout << frontier.top()->state << endl;
 
     if (problem.goal_test(current->state)) {
       vector<StateType> path;
