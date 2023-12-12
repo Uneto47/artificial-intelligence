@@ -221,39 +221,14 @@ const char DELIMITER = ',';
 int main(int argc, char **argv) {
   if (argc < 3 || argc > 4) {
     cerr << "Usage: ./a-star [initial] [goal] [, [table size]]" << endl;
-    cerr << "[inital] and [goal] must be a pair of integers x,y and [table "
-            "size] an integer"
-         << endl;
+    cerr << "[inital] and [goal] must be a pair of integers x,y "
+         << "and the range is [1, [table size]]" << endl;
+    cerr << "[table size] must be an integer" << endl;
     return 1;
   }
 
   pair<int, int> initial, goal;
   size_t table_size = 8;
-
-  string first, second, buffer;
-  char *fp, *sp;
-
-  buffer = argv[1];
-  first = buffer.substr(0, buffer.find(DELIMITER));
-  buffer.erase(0, buffer.find(DELIMITER) + 1);
-  second = buffer;
-  initial.first = strtol(first.c_str(), &fp, 10);
-  initial.second = strtol(second.c_str(), &sp, 10);
-  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
-    cerr << "[initial] must be a pair of intergers x,y" << endl;
-    return 1;
-  }
-
-  buffer = argv[2];
-  first = buffer.substr(0, buffer.find(DELIMITER));
-  buffer.erase(0, buffer.find(DELIMITER) + 1);
-  second = buffer;
-  goal.first = strtol(first.c_str(), &fp, 10);
-  goal.second = strtol(second.c_str(), &sp, 10);
-  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
-    cerr << "[goal] must be a pair of intergers x,y" << endl;
-    return 1;
-  }
 
   if (argc == 4) {
     char *p;
@@ -262,6 +237,39 @@ int main(int argc, char **argv) {
       cerr << "[table size] must be an interger" << endl;
       return 1;
     }
+  }
+
+  string first, second, buffer;
+  char *fp, *sp;
+
+  buffer = argv[1];
+  first = buffer.substr(0, buffer.find(DELIMITER));
+  buffer.erase(0, buffer.find(DELIMITER) + 1);
+  second = buffer;
+  initial.first = strtol(first.c_str(), &fp, 10) - 1;
+  initial.second = strtol(second.c_str(), &sp, 10) - 1;
+  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
+    cerr << "[initial] must be a pair of intergers x,y" << endl;
+    return 1;
+  }
+  if (initial.first < 0 || initial.second > table_size - 1) {
+    cerr << "[initial] is out of range" << endl;
+    return 1;
+  }
+
+  buffer = argv[2];
+  first = buffer.substr(0, buffer.find(DELIMITER));
+  buffer.erase(0, buffer.find(DELIMITER) + 1);
+  second = buffer;
+  goal.first = strtol(first.c_str(), &fp, 10) - 1;
+  goal.second = strtol(second.c_str(), &sp, 10) - 1;
+  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
+    cerr << "[goal] must be a pair of intergers x,y" << endl;
+    return 1;
+  }
+  if (goal.first < 0 || goal.second > table_size - 1) {
+    cerr << "[goal] is out of range" << endl;
+    return 1;
   }
 
   auto problem = KnightsTravailsProblem(initial, goal, table_size);
