@@ -220,7 +220,7 @@ const char DELIMITER = ',';
 
 int main(int argc, char **argv) {
   if (argc < 3 || argc > 4) {
-    cerr << "Usage: ./a-star [initial] [goal] [, [table size]]" << endl;
+    cerr << "Usage: ./a-star [initial] [goal] [[table size] = 8]" << endl;
     cerr << "[inital] and [goal] must be a pair of integers x,y "
          << "and the range is [1, [table size]]" << endl;
     cerr << "[table size] must be an integer" << endl;
