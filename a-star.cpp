@@ -104,6 +104,7 @@ struct KnightsTravailsProblem : Problem {
 
     return valid_actions;
   }
+
   bool at_bounds(int x, int y) {
     return x >= 0 && x < this->table_size && y >= 0 && y < this->table_size;
   }
@@ -170,9 +171,101 @@ vector<StateType> astar(ProblemType problem) {
   return {};
 }
 
-int main(void) {
+// Get maching char for the current room
+char get_room_char(vector<KnightsTravailsState> states,
+                   KnightsTravailsState current) {
+  if (states[0] == current)
+    return 'I';
+  else if (states[states.size() - 1] == current)
+    return 'G';
+  else if (find(states.begin(), states.end(), current) != states.end())
+    return '*';
+  return ' ';
+}
+
+// Print table for the problem
+void print_table_with_result(vector<KnightsTravailsState> states,
+                             size_t table_size) {
+  cout << "Path: ";
+  for (int c = 0; c < states.size() - 1; c++)
+    cout << '(' << states[c].position.first + 1 << ','
+         << states[c].position.second + 1 << ')' << "->";
+  cout << '(' << states[states.size() - 1].position.first + 1 << ','
+       << states[states.size() - 1].position.second + 1 << ')' << endl;
+  cout << "┏━";
+  for (int c = table_size - 1; c > 0; c--)
+    cout << "━━┳━";
+  cout << "━━┓" << endl;
+  for (int c = table_size - 1; c > 0; c--) {
+    cout << "┃ ";
+    for (int k = 0; k < table_size - 1; k++)
+      cout << get_room_char(states, {k, c}) << " ┃ ";
+    cout << get_room_char(states, {(int)table_size - 1, c}) << " ┃" << endl;
+    cout << "┣━";
+    for (int k = table_size - 1; k > 0; k--)
+      cout << "━━╋━";
+    cout << "━━┫" << endl;
+  }
+  cout << "┃ ";
+  for (int k = 0; k < table_size - 1; k++)
+    cout << get_room_char(states, {k, 0}) << " ┃ ";
+  cout << get_room_char(states, {(int)table_size - 1, 0}) << " ┃" << endl;
+  cout << "┗━";
+  for (int c = table_size - 1; c > 0; c--)
+    cout << "━━┻━";
+  cout << "━━┛" << endl;
+}
+
+const char DELIMITER = ',';
+
+int main(int argc, char **argv) {
+  if (argc < 3 || argc > 4) {
+    cerr << "Usage: ./a-star [initial] [goal] [, [table size]]" << endl;
+    cerr << "[inital] and [goal] must be a pair of integers x,y and [table "
+            "size] an integer"
+         << endl;
+    return 1;
+  }
+
+  pair<int, int> initial, goal;
+  size_t table_size = 8;
+
+  string first, second, buffer;
+  char *fp, *sp;
+
+  buffer = argv[1];
+  first = buffer.substr(0, buffer.find(DELIMITER));
+  buffer.erase(0, buffer.find(DELIMITER) + 1);
+  second = buffer;
+  initial.first = strtol(first.c_str(), &fp, 10);
+  initial.second = strtol(second.c_str(), &sp, 10);
+  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
+    cerr << "[initial] must be a pair of intergers x,y" << endl;
+    return 1;
+  }
+
+  buffer = argv[2];
+  first = buffer.substr(0, buffer.find(DELIMITER));
+  buffer.erase(0, buffer.find(DELIMITER) + 1);
+  second = buffer;
+  goal.first = strtol(first.c_str(), &fp, 10);
+  goal.second = strtol(second.c_str(), &sp, 10);
+  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
+    cerr << "[goal] must be a pair of intergers x,y" << endl;
+    return 1;
+  }
+
+  if (argc == 4) {
+    char *p;
+    table_size = strtol(argv[3], &p, 10);
+    if (*p) {
+      cerr << "[table size] must be an interger" << endl;
+      return 1;
+    }
+  }
+
+  auto problem = KnightsTravailsProblem(initial, goal, table_size);
   auto states = astar<KnightsTravailsState, KnightsTravailsStateHash,
-                      KnightsTravailsAction, KnightsTravailsProblem>(
-      KnightsTravailsProblem({0, 0}, {7, 7}));
-  cout << states.size() << endl;
+                      KnightsTravailsAction, KnightsTravailsProblem>(problem);
+  print_table_with_result(states, table_size);
 }
