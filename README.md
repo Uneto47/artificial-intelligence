@@ -12,3 +12,15 @@ $ make filename
 $ ./filename
 Usage: ...
 ```
+
+## Algorithms
+
+* Week 0 ([Knight's Travails](https://en.wikipedia.org/wiki/Knight%27s_tour))
+    - [X] [A*](a-star.cpp)
+* Week 1
+    - [ ] Genetic Algorithm
+    - [ ] Simulated Annealing
+* Week 2
+    - [ ] Minimax
+    - [ ] Expectiminimax
+    - [ ] Monte Carlo Tree Search
