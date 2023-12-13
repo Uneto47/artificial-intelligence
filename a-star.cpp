@@ -145,26 +145,27 @@ vector<StateType> astar(ProblemType problem) {
   while (!frontier.empty()) {
     shared_ptr<Node<StateType>> current = frontier.top();
     frontier.pop();
-
-    if (problem.goal_test(current->state)) {
-      vector<StateType> path;
-      auto node = current;
-      while (node != nullptr) {
-        path.push_back(node->state);
-        node = node->parent;
-      }
-      reverse(path.begin(), path.end());
-      return path;
-    }
-
     explored[current->state] = current;
+
     for (auto action : problem.actions(current->state)) {
       auto next = problem.result(current->state, action);
       auto cost =
           problem.path_cost(current->cost, current->state, action, next);
+      auto node = make_shared<Node<StateType>>(next, current,
+                                               cost + problem.heuristics(next));
+
+      if (problem.goal_test(node->state)) {
+        vector<StateType> path;
+        while (node != nullptr) {
+          path.push_back(node->state);
+          node = node->parent;
+        }
+        reverse(path.begin(), path.end());
+        return path;
+      }
+
       if (explored.find(next) == explored.end() || cost < explored[next]->cost)
-        frontier.push(make_shared<Node<StateType>>(
-            next, current, cost + problem.heuristics(next)));
+        frontier.push(node);
     }
   }
 
