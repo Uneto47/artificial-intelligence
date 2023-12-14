@@ -64,18 +64,6 @@ struct KnightsTravailsProblem : Problem<S, A> {
       : Problem<S, A>(initial, goal), table_size(table_size) {}
 };
 
-template <typename S, typename A>
-vector<shared_ptr<Node<S, A>>> expands(Problem<S, A> &problem, shared_ptr<Node<S, A>> node) {
-  vector<shared_ptr<Node<S, A>>> results;
-  for (auto action : problem.actions(node->state)) {
-    auto next = problem.result(node->state, action);
-    auto cost = problem.path_cost(node->cost, node->state, action, next);
-    auto child = make_shared<Node<S, A>>(next, action, node, cost + problem.heuristics(next));
-    results.push_back(child);
-  }
-  return results;
-}
-
 // A* implementation
 template <typename S, typename A>
 shared_ptr<Node<S, A>> astar(Problem<S, A> &problem) {
