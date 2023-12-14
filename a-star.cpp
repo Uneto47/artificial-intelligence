@@ -173,15 +173,15 @@ vector<StateType> astar(ProblemType problem) {
 }
 
 // Get maching char for the current room
-char get_room_char(vector<KnightsTravailsState> states,
-                   KnightsTravailsState current) {
+string get_room_char(vector<KnightsTravailsState> states,
+                     KnightsTravailsState current) {
   if (states[0] == current)
-    return 'I';
+    return "♞";
   else if (states[states.size() - 1] == current)
-    return 'G';
+    return "G";
   else if (find(states.begin(), states.end(), current) != states.end())
-    return '*';
-  return ' ';
+    return "*";
+  return " ";
 }
 
 // Print table for the problem
