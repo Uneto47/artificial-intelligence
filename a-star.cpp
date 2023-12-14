@@ -1,180 +1,133 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <ostream>
 #include <queue>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 using namespace std;
 
 // Problem interface implementation
-struct State {
-  size_t operator==(const State &rhs) const { return 0; }
-};
-
-struct StateHash {
-  size_t operator()(const State &state) const { return 0; }
-};
-
-struct Action {};
-
+template <typename S, typename A>
 struct Problem {
-  State initial;
-  State goal;
+  S initial, goal;
 
-  State result(const State &state, const Action &action) { return {}; }
-  int path_cost(const int current_cost, const State &current,
-                const Action &action, const State &next) {
-    return 0;
-  }
-  int heuristics(const State &next) { return 0; }
-  bool goal_test(const State &current) { return false; }
-  vector<Action> actions(const State &current) { return {}; }
+  virtual S result(const S &state, const A &action) = 0;
+  virtual int path_cost(const int current_cost, const S &current, const A &action, const S &next) = 0;
+  virtual int heuristics(const S &next) = 0;
+  virtual bool goal_test(const S &current) = 0;
+  virtual vector<A> actions(const S &current) = 0;
+
+  Problem(S initial, S goal)
+      : initial(initial), goal(goal) {}
 };
 
 // Knight's Travails problem implementation
-const vector<pair<int, int>> VALID_MOVES = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1},
-                                            {1, 2}, {-1, 2}, {1, -2}, {-1, -2}};
+using KnightsTravailsState = pair<int, int>;
+using KnightsTravailsAction = pair<int, int>;
+const vector<KnightsTravailsAction> VALID_MOVES = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {-1, 2}, {1, -2}, {-1, -2}};
 
-struct KnightsTravailsState : State {
-  pair<int, int> position;
-
-  size_t operator==(const KnightsTravailsState &rhs) const {
-    return this->position.first == rhs.position.first &&
-           this->position.second == rhs.position.second;
-  }
-
-  KnightsTravailsState(int x, int y) : position({x, y}) {}
-  KnightsTravailsState(pair<int, int> position) : position(position) {}
-};
-
-struct KnightsTravailsStateHash : StateHash {
-  size_t operator()(const KnightsTravailsState &state) const {
-    return (state.position.first * 0x1f1f1f1f) ^ state.position.second;
-  }
-};
-
-struct KnightsTravailsAction : Action {
-  pair<int, int> move;
-  KnightsTravailsAction(int x, int y) : move({x, y}) {}
-  KnightsTravailsAction(pair<int, int> move) : move(move) {}
-};
-
-struct KnightsTravailsProblem : Problem {
-  KnightsTravailsState initial;
-  KnightsTravailsState goal;
+template <typename S, typename A>
+struct KnightsTravailsProblem : Problem<S, A> {
   size_t table_size;
 
-  KnightsTravailsState result(const KnightsTravailsState &state,
-                              const KnightsTravailsAction &action) {
-    int x = action.move.first + state.position.first;
-    int y = action.move.second + state.position.second;
-    return KnightsTravailsState(x, y);
+  S result(const S &state, const A &action) override {
+    int x = action.first + state.first;
+    int y = action.second + state.second;
+    return S(x, y);
   }
 
-  int path_cost(const int current_cost, const KnightsTravailsState &current,
-                const KnightsTravailsAction &action,
-                const KnightsTravailsState &next) {
+  int path_cost(const int current_cost, const S &current, const A &action, const S &next) override {
     return current_cost + 1;
   }
 
-  int heuristics(const KnightsTravailsState &next) {
-    return abs(next.position.first - goal.position.first) +
-           abs(next.position.second - goal.position.second);
+  int heuristics(const S &next) override {
+    return abs(next.first - this->goal.first) +
+           abs(next.second - this->goal.second);
   }
 
-  bool goal_test(const KnightsTravailsState &current) {
-    return current.position.first == this->goal.position.first &&
-           current.position.second == this->goal.position.second;
+  bool goal_test(const S &current) override {
+    return current.first == this->goal.first &&
+           current.second == this->goal.second;
   }
 
-  vector<KnightsTravailsAction> actions(const KnightsTravailsState &current) {
-    vector<KnightsTravailsAction> valid_actions;
-    auto position = current.position;
+  vector<A> actions(const S &current) override {
+    vector<A> valid_actions;
 
     for (auto move : VALID_MOVES) {
-      int x = move.first + position.first;
-      int y = move.second + position.second;
+      int x = move.first + current.first;
+      int y = move.second + current.second;
       if (at_bounds(x, y))
-        valid_actions.push_back(KnightsTravailsAction(move));
+        valid_actions.push_back(move);
     }
 
     return valid_actions;
   }
 
   bool at_bounds(int x, int y) {
-    return x >= 0 && x < this->table_size && y >= 0 && y < this->table_size;
+    return x >= 0 && x < this->table_size &&
+           y >= 0 && y < this->table_size;
   }
 
-  KnightsTravailsProblem(KnightsTravailsState initial,
-                         KnightsTravailsState goal, size_t table_size = 8)
-      : initial(initial), goal(goal), table_size(table_size) {}
+  KnightsTravailsProblem(S initial, S goal, size_t table_size = 8)
+      : Problem<S, A>(initial, goal), table_size(table_size) {}
 };
 
 // Search tree node for A*
-template <typename StateType = State> struct Node {
-  StateType state;
-  shared_ptr<Node<StateType>> parent;
+template <typename S>
+struct Node {
+  S state;
+  shared_ptr<Node<S>> parent;
   int cost;
 
-  Node(StateType state, shared_ptr<Node<StateType>> parent, int cost)
+  Node(S state, shared_ptr<Node<S>> parent = nullptr, int cost = 0)
       : state(state), parent(parent), cost(cost){};
 };
 
-template <typename StateType = State> struct NodeComparator {
-  bool operator()(const shared_ptr<Node<StateType>> lhs,
-                  const shared_ptr<Node<StateType>> rhs) const {
-    return lhs->cost > rhs->cost;
-  };
-};
+template <typename S, typename A>
+vector<shared_ptr<Node<S>>> expands(Problem<S, A> &problem, shared_ptr<Node<S>> node) {
+  vector<shared_ptr<Node<S>>> results;
+  for (auto action : problem.actions(node->state)) {
+    auto next = problem.result(node->state, action);
+    auto cost = problem.path_cost(node->cost, node->state, action, next);
+    auto child = make_shared<Node<S>>(next, node, cost + problem.heuristics(next));
+    results.push_back(child);
+  }
+  return results;
+}
 
 // A* implementation
-template <typename StateType = State, typename StateHashType = StateHash,
-          typename ActionType = Action, typename ProblemType = Problem>
-vector<StateType> astar(ProblemType problem) {
-  priority_queue<shared_ptr<Node<StateType>>,
-                 vector<shared_ptr<Node<StateType>>>, NodeComparator<StateType>>
-      frontier;
-  frontier.push(make_shared<Node<StateType>>(problem.initial, nullptr, 0));
-
-  unordered_map<StateType, shared_ptr<Node<StateType>>, StateHash> explored;
+template <typename S, typename A>
+shared_ptr<Node<S>> astar(Problem<S, A> &problem) {
+  auto explored = map<S, shared_ptr<Node<S>>>{};
+  auto frontier = priority_queue<
+      pair<int, shared_ptr<Node<S>>>,
+      vector<pair<int, shared_ptr<Node<S>>>>,
+      greater<pair<int, shared_ptr<Node<S>>>>>{};
+  frontier.push({0, make_shared<Node<S>>(problem.initial)});
 
   while (!frontier.empty()) {
-    shared_ptr<Node<StateType>> current = frontier.top();
+    auto [_, current] = frontier.top();
     frontier.pop();
     explored[current->state] = current;
 
-    for (auto action : problem.actions(current->state)) {
-      auto next = problem.result(current->state, action);
-      auto cost =
-          problem.path_cost(current->cost, current->state, action, next);
-      auto node = make_shared<Node<StateType>>(next, current,
-                                               cost + problem.heuristics(next));
-
-      if (problem.goal_test(node->state)) {
-        vector<StateType> path;
-        while (node != nullptr) {
-          path.push_back(node->state);
-          node = node->parent;
-        }
-        reverse(path.begin(), path.end());
-        return path;
-      }
-
-      if (explored.find(next) == explored.end() || cost < explored[next]->cost)
-        frontier.push(node);
+    for (auto node : expands(problem, current)) {
+      if (problem.goal_test(node->state))
+        return node;
+      else if (explored.find(node->state) == explored.end() || node->cost < explored[node->state]->cost)
+        frontier.push({node->cost, node});
     }
   }
 
-  return {};
+  return nullptr;
 }
 
 // Get maching char for the current room
-string get_room_char(vector<KnightsTravailsState> states,
-                     KnightsTravailsState current) {
+string get_room_char(vector<pair<int, int>> states, pair<int, int> current) {
   if (states[0] == current)
     return "♞";
   else if (states[states.size() - 1] == current)
@@ -185,14 +138,21 @@ string get_room_char(vector<KnightsTravailsState> states,
 }
 
 // Print table for the problem
-void print_table_with_result(vector<KnightsTravailsState> states,
-                             size_t table_size) {
+void print_table_with_result(shared_ptr<Node<KnightsTravailsState>> node, size_t table_size) {
+  vector<KnightsTravailsState> states;
+  auto current = node;
+  while (current != nullptr) {
+    states.push_back(current->state);
+    current = current->parent;
+  }
+  reverse(states.begin(), states.end());
+
   cout << "Path: ";
   for (int c = 0; c < states.size() - 1; c++)
-    cout << '(' << states[c].position.first + 1 << ','
-         << states[c].position.second + 1 << ')' << "->";
-  cout << '(' << states[states.size() - 1].position.first + 1 << ','
-       << states[states.size() - 1].position.second + 1 << ')' << endl;
+    cout << '(' << states[c].first + 1 << ','
+         << states[c].second + 1 << ')' << "->";
+  cout << '(' << states[states.size() - 1].first + 1 << ','
+       << states[states.size() - 1].second + 1 << ')' << endl;
   cout << "┏━";
   for (int c = table_size - 1; c > 0; c--)
     cout << "━━┳━";
@@ -273,8 +233,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  auto problem = KnightsTravailsProblem(initial, goal, table_size);
-  auto states = astar<KnightsTravailsState, KnightsTravailsStateHash,
-                      KnightsTravailsAction, KnightsTravailsProblem>(problem);
-  print_table_with_result(states, table_size);
+  auto problem = KnightsTravailsProblem<KnightsTravailsState, KnightsTravailsAction>(initial, goal, table_size);
+  auto node = astar<KnightsTravailsState, KnightsTravailsAction>(problem);
+  print_table_with_result(node, table_size);
 }
