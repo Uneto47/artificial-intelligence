@@ -10,25 +10,12 @@
 #include <utility>
 #include <vector>
 using namespace std;
-
-// Problem interface implementation
-template <typename S, typename A>
-struct Problem {
-  S initial, goal;
-
-  virtual S result(const S &state, const A &action) = 0;
-  virtual int path_cost(const int current_cost, const S &current, const A &action, const S &next) = 0;
-  virtual int heuristics(const S &next) = 0;
-  virtual bool goal_test(const S &current) = 0;
-  virtual vector<A> actions(const S &current) = 0;
-
-  Problem(S initial, S goal)
-      : initial(initial), goal(goal) {}
-};
+#include "utils.cpp"
 
 // Knight's Travails problem implementation
 using KnightsTravailsState = pair<int, int>;
 using KnightsTravailsAction = pair<int, int>;
+const KnightsTravailsAction IDLE_ACTION = {0, 0};
 const vector<KnightsTravailsAction> VALID_MOVES = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {-1, 2}, {1, -2}, {-1, -2}};
 
 template <typename S, typename A>
@@ -77,24 +64,13 @@ struct KnightsTravailsProblem : Problem<S, A> {
       : Problem<S, A>(initial, goal), table_size(table_size) {}
 };
 
-// Search tree node for A*
-template <typename S>
-struct Node {
-  S state;
-  shared_ptr<Node<S>> parent;
-  int cost;
-
-  Node(S state, shared_ptr<Node<S>> parent = nullptr, int cost = 0)
-      : state(state), parent(parent), cost(cost){};
-};
-
 template <typename S, typename A>
-vector<shared_ptr<Node<S>>> expands(Problem<S, A> &problem, shared_ptr<Node<S>> node) {
-  vector<shared_ptr<Node<S>>> results;
+vector<shared_ptr<Node<S, A>>> expands(Problem<S, A> &problem, shared_ptr<Node<S, A>> node) {
+  vector<shared_ptr<Node<S, A>>> results;
   for (auto action : problem.actions(node->state)) {
     auto next = problem.result(node->state, action);
     auto cost = problem.path_cost(node->cost, node->state, action, next);
-    auto child = make_shared<Node<S>>(next, node, cost + problem.heuristics(next));
+    auto child = make_shared<Node<S, A>>(next, action, node, cost + problem.heuristics(next));
     results.push_back(child);
   }
   return results;
@@ -102,13 +78,13 @@ vector<shared_ptr<Node<S>>> expands(Problem<S, A> &problem, shared_ptr<Node<S>> 
 
 // A* implementation
 template <typename S, typename A>
-shared_ptr<Node<S>> astar(Problem<S, A> &problem) {
-  auto explored = map<S, shared_ptr<Node<S>>>{};
+shared_ptr<Node<S, A>> astar(Problem<S, A> &problem) {
+  auto explored = map<S, shared_ptr<Node<S, A>>>{};
   auto frontier = priority_queue<
-      pair<int, shared_ptr<Node<S>>>,
-      vector<pair<int, shared_ptr<Node<S>>>>,
-      greater<pair<int, shared_ptr<Node<S>>>>>{};
-  frontier.push({0, make_shared<Node<S>>(problem.initial)});
+      pair<int, shared_ptr<Node<S, A>>>,
+      vector<pair<int, shared_ptr<Node<S, A>>>>,
+      greater<pair<int, shared_ptr<Node<S, A>>>>>{};
+  frontier.push({0, make_shared<Node<S, A>>(problem.initial, IDLE_ACTION)});
 
   while (!frontier.empty()) {
     auto [_, current] = frontier.top();
@@ -138,7 +114,7 @@ string get_room_char(vector<pair<int, int>> states, pair<int, int> current) {
 }
 
 // Print table for the problem
-void print_table_with_result(shared_ptr<Node<KnightsTravailsState>> node, size_t table_size) {
+void print_table_with_result(shared_ptr<Node<KnightsTravailsState, KnightsTravailsAction>> node, size_t table_size) {
   vector<KnightsTravailsState> states;
   auto current = node;
   while (current != nullptr) {
