@@ -10,10 +10,28 @@ using namespace std;
 using NQueenState = int;
 
 int nqueen_fitthreshold(size_t table_size) {
-  return table_size + (table_size - 1 / 2);
+  return table_size * (table_size - 1 / 2);
 }
 
-vector<NQueenState> nqueen_fitness(vector<NQueenState> individual) {
+NQueenState nqueen_fitness(vector<NQueenState> individual) {
+  NQueenState collisions = 0;
+  for (int i = 0; i < individual.size() - 1; i++) {
+    for (int j = 1; j < individual.size(); j++) {
+      int target = individual[i + j];
+      int forward_move = individual[i];
+      int forward_ascending_move = individual[i] + j;
+      int forward_descending_move = individual[i] - j;
+      bool at_bounds_upwards = forward_ascending_move <= individual.size();
+      bool at_bounds_downwards = forward_descending_move > 0;
+
+      if ((forward_move == target) ||
+          (at_bounds_upwards && forward_ascending_move == target) ||
+          (at_bounds_downwards && forward_descending_move == target)) {
+        collisions++;
+      }
+    }
+  }
+  return nqueen_fitthreshold(individual.size()) - collisions;
 }
 
 template <typename S>
