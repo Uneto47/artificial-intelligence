@@ -40,3 +40,14 @@ vector<shared_ptr<Node<S, A>>> expands(Problem<S, A> &problem, shared_ptr<Node<S
   }
   return results;
 }
+
+// Check if position is at bounds of the table
+bool at_bounds(int x, int y, size_t table_size) {
+  return x >= 0 && x < table_size &&
+         y >= 0 && y < table_size;
+}
+
+bool at_bounds(pair<int, int> position, size_t table_size) {
+  return position.first >= 0 && position.first < table_size &&
+         position.second >= 0 && position.second < table_size;
+}

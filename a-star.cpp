@@ -48,16 +48,11 @@ struct KnightsTravailsProblem : Problem<S, A> {
     for (auto move : VALID_MOVES) {
       int x = move.first + current.first;
       int y = move.second + current.second;
-      if (at_bounds(x, y))
+      if (at_bounds(x, y, this->table_size))
         valid_actions.push_back(move);
     }
 
     return valid_actions;
-  }
-
-  bool at_bounds(int x, int y) {
-    return x >= 0 && x < this->table_size &&
-           y >= 0 && y < this->table_size;
   }
 
   KnightsTravailsProblem(S initial, S goal, size_t table_size = 8)
