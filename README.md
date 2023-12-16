@@ -15,10 +15,10 @@ Usage: ...
 
 ## Algorithms
 
-* Week 0 ([Knight's Travails](https://en.wikipedia.org/wiki/Knight%27s_tour))
-    - [X] [A*](a-star.cpp)
+* Week 0
+    - [X] [A*](a-star.cpp) solving [Knight's Travails](https://en.wikipedia.org/wiki/Knight%27s_tour)
 * Week 1
-    - [ ] Genetic Algorithm
+    - [X] [Genetic Algorithm](genetic-algorithm.cpp) solving [N Queens Puzzle](https://en.wikipedia.org/wiki/Eight_queens_puzzle)
     - [ ] Simulated Annealing
 * Week 2
     - [ ] Minimax
