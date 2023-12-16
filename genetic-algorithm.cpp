@@ -128,6 +128,38 @@ vector<S> genetic_algorithm(vector<vector<S>> population, function<int(vector<S>
   return population[0];
 }
 
+void print_table_with_result(vector<NQueenState> solution, size_t gens, size_t table_size) {
+  auto get_room_char = [solution](int c, int k) { return solution[c] == k + 1 ? "♛" : " "; };
+  cout << "Generations: " << gens << endl;
+  cout << "Array representation: [ ";
+  for (auto gene : solution) {
+    cout << gene << " ";
+  }
+  cout << "]" << endl;
+  cout << "┏━";
+  for (int c = table_size - 1; c > 0; c--)
+    cout << "━━┳━";
+  cout << "━━┓" << endl;
+  for (int c = table_size - 1; c > 0; c--) {
+    cout << "┃ ";
+    for (int k = 0; k < table_size - 1; k++)
+      cout << get_room_char(c, k) << " ┃ ";
+    cout << get_room_char(c, (int)table_size - 1) << " ┃" << endl;
+    cout << "┣━";
+    for (int k = table_size - 1; k > 0; k--)
+      cout << "━━╋━";
+    cout << "━━┫" << endl;
+  }
+  cout << "┃ ";
+  for (int k = 0; k < table_size - 1; k++)
+    cout << get_room_char(0, k) << " ┃ ";
+  cout << get_room_char(0, (int)table_size - 1) << " ┃" << endl;
+  cout << "┗━";
+  for (int c = table_size - 1; c > 0; c--)
+    cout << "━━┻━";
+  cout << "━━┛" << endl;
+}
+
 int main(void) {
   srand(time(NULL));
   size_t table_size = 8;
@@ -143,11 +175,5 @@ int main(void) {
   }
 
   auto fittest = genetic_algorithm<NQueenState>(population, nqueen_fitness<NQueenState>, genes, nqueen_fitthreshold(table_size), NOGENLIMIT, 0.1, gens);
-
-  cout << "Fittest individual with " << *gens << " generations: ";
-  cout << "[ ";
-  for (auto gene : fittest) {
-    cout << gene << " ";
-  }
-  cout << "]" << endl;
+  print_table_with_result(fittest, *gens, table_size);
 }
