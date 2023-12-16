@@ -141,9 +141,8 @@ const char DELIMITER = ',';
 int main(int argc, char **argv) {
   if (argc < 3 || argc > 4) {
     cerr << "Usage: ./a-star [initial] [goal] [[table size] = 8]" << endl;
-    cerr << "[inital] and [goal] must be a pair of integers x,y "
-         << "and the range is [1, [table size]]" << endl;
-    cerr << "[table size] must be an integer" << endl;
+    cerr << "[initial] and [goal] must be a pair of positive integers x,y between 1 and [table size]" << endl;
+    cerr << "[table size] must be a positive integer greater or equal 4" << endl;
     return 1;
   }
 
@@ -153,8 +152,8 @@ int main(int argc, char **argv) {
   if (argc == 4) {
     char *p;
     table_size = strtol(argv[3], &p, 10);
-    if (*p) {
-      cerr << "[table size] must be an interger" << endl;
+    if (*p || table_size < 4) {
+      cerr << "[table size] must be a positive integer greater or equal 4" << endl;
       return 1;
     }
   }
@@ -168,12 +167,8 @@ int main(int argc, char **argv) {
   second = buffer;
   initial.first = strtol(first.c_str(), &fp, 10) - 1;
   initial.second = strtol(second.c_str(), &sp, 10) - 1;
-  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
-    cerr << "[initial] must be a pair of intergers x,y" << endl;
-    return 1;
-  }
-  if (initial.first < 0 || initial.second > table_size - 1) {
-    cerr << "[initial] is out of range" << endl;
+  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp || initial.first < 0 || initial.second > table_size - 1) {
+    cerr << "[initial] must be a pair of positive integers x,y between 1 and [table size]" << endl;
     return 1;
   }
 
@@ -183,12 +178,8 @@ int main(int argc, char **argv) {
   second = buffer;
   goal.first = strtol(first.c_str(), &fp, 10) - 1;
   goal.second = strtol(second.c_str(), &sp, 10) - 1;
-  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp) {
-    cerr << "[goal] must be a pair of intergers x,y" << endl;
-    return 1;
-  }
-  if (goal.first < 0 || goal.second > table_size - 1) {
-    cerr << "[goal] is out of range" << endl;
+  if (buffer.find(DELIMITER) != buffer.npos || *fp || *sp || goal.first < 0 || goal.second > table_size - 1) {
+    cerr << "[goal] must be a pair of positive integers x,y between 1 and [table size]" << endl;
     return 1;
   }
 
