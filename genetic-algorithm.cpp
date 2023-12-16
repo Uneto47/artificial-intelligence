@@ -100,6 +100,11 @@ vector<int> weight_by(vector<vector<S>> population, function<int(vector<S>)> fit
 template <typename S>
 vector<S> genetic_algorithm(vector<vector<S>> population, function<int(vector<S>)> fitness, vector<S> genes, int fitthreshold = 0, ssize_t genlimit = 10000, double mutation_probability = 0.1, shared_ptr<size_t> gens = NULL) {
   while (genlimit > 0 || genlimit == NOGENLIMIT) {
+    if (gens != NULL)
+      (*gens)++;
+    if (genlimit != -1)
+      genlimit--;
+
     auto weights = weight_by(population, fitness);
 
     vector<vector<S>> generation(population.size());
@@ -117,19 +122,13 @@ vector<S> genetic_algorithm(vector<vector<S>> population, function<int(vector<S>
       generation[i] = child;
     }
     population = generation;
-
-    if (gens != NULL)
-      (*gens)++;
-
-    if (genlimit != -1)
-      genlimit--;
   }
 
   return population[0];
 }
 
 void print_table_with_result(vector<NQueenState> solution, size_t gens, size_t table_size) {
-  auto get_room_char = [solution](int c, int k) { return solution[c] == k + 1 ? "♛" : " "; };
+  auto get_room_char = [solution](int k, int c) { return solution[c] == k + 1 ? "♛" : " "; };
   cout << "Generations: " << gens << endl;
   cout << "Array representation: [ ";
   for (auto gene : solution) {
@@ -160,20 +159,49 @@ void print_table_with_result(vector<NQueenState> solution, size_t gens, size_t t
   cout << "━━┛" << endl;
 }
 
-int main(void) {
+int main(int argc, char **argv) {
   srand(time(NULL));
   size_t table_size = 8;
-  vector<NQueenState> genes = {1, 2, 3, 4, 5, 6, 7, 8};
-  size_t population_size = 100;
-  vector<vector<NQueenState>> population;
+  size_t samples = 100;
   shared_ptr<size_t> gens = make_shared<size_t>(0);
 
-  for (int i = 0; i < population_size; i++) {
-    population.push_back({});
-    for (int j = 0; j < table_size; j++)
-      population[i].push_back(rand() % table_size + 1);
+  if (argc > 3) {
+    cerr << "Usage: ./genetic-algorithm [[samples] = 100] [[table size] = 8]" << endl;
+    cerr << "[samples] must be a positive integer greater or equal 20" << endl;
+    cerr << "[table size] must be a positive integer greater or equal 4" << endl;
+    return 1;
   }
 
+  if (argc > 1) {
+    char *p;
+    samples = strtol(argv[1], &p, 10);
+    if (*p || samples < 20) {
+      cerr << "[samples] must be a positive integer greater or equal 20" << endl;
+      return 1;
+    }
+  }
+
+  if (argc > 2) {
+    char *p;
+    table_size = strtol(argv[2], &p, 10);
+    if (*p || table_size < 4) {
+      cerr << "[table size] must be a positive integer greater or equal 4" << endl;
+      return 1;
+    }
+  }
+
+  vector<vector<NQueenState>> population(samples);
+  for (int i = 0; i < samples; i++) {
+    population[i] = vector<NQueenState>(table_size);
+    for (int j = 0; j < table_size; j++)
+      population[i][j] = rand() % table_size + 1;
+  }
+
+  vector<NQueenState> genes(table_size);
+  for (int i = 0; i < table_size; i++)
+    genes[i] = i + 1;
+
   auto fittest = genetic_algorithm<NQueenState>(population, nqueen_fitness<NQueenState>, genes, nqueen_fitthreshold(table_size), NOGENLIMIT, 0.1, gens);
+
   print_table_with_result(fittest, *gens, table_size);
 }
