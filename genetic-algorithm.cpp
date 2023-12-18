@@ -21,7 +21,7 @@ template <typename S>
 int nqueen_fitness(vector<S> individual) {
   int collisions = 0;
   for (int i = 0; i < individual.size() - 1; i++) {
-    for (int j = 1; j < individual.size(); j++) {
+    for (int j = 1; j < individual.size() - i; j++) {
       int target = individual[i + j];
       int forward_move = individual[i];
       int forward_ascending_move = individual[i] + j;
