@@ -13,10 +13,12 @@ using namespace std;
 using NQueenState = int;
 const ssize_t NOGENLIMIT = -1;
 
+// Get all collision possibilities from table size
 int nqueen_fitthreshold(size_t table_size) {
   return table_size * ((table_size - 1) / 2.0);
 }
 
+// Fit queen individual from collision
 template <typename S>
 int nqueen_fitness(vector<S> individual) {
   int collisions = 0;
@@ -38,6 +40,7 @@ int nqueen_fitness(vector<S> individual) {
   return nqueen_fitthreshold(individual.size()) - collisions;
 }
 
+// Change random gene from individual
 template <typename S>
 vector<S> mutate(vector<S> individual, vector<S> genes) {
   int n = rand() % individual.size();
@@ -49,6 +52,7 @@ vector<S> mutate(vector<S> individual, vector<S> genes) {
   return individual;
 }
 
+// Merge individual genes and generate child
 template <typename S>
 vector<S> reproduce(vector<S> parentx, vector<S> parenty) {
   int n = rand() % parentx.size();
@@ -63,6 +67,7 @@ vector<S> reproduce(vector<S> parentx, vector<S> parenty) {
 }
 
 // https://stackoverflow.com/questions/56723551
+// Select best genes from random
 template <typename S>
 pair<vector<S>, vector<S>> selection(vector<vector<S>> population, vector<int> weights) {
   int total = 0;
@@ -89,6 +94,7 @@ pair<vector<S>, vector<S>> selection(vector<vector<S>> population, vector<int> w
   return {parents[0], parents[1]};
 }
 
+// Apply fitness into individual
 template <typename S>
 vector<int> weight_by(vector<vector<S>> population, function<int(vector<S>)> fitness) {
   vector<int> weights(population.size());
@@ -97,6 +103,7 @@ vector<int> weight_by(vector<vector<S>> population, function<int(vector<S>)> fit
   return weights;
 }
 
+// Generic genetic algorithm function
 template <typename S>
 vector<S> genetic_algorithm(vector<vector<S>> population, function<int(vector<S>)> fitness, vector<S> genes, int fitthreshold = 0, ssize_t genlimit = 10000, double mutation_probability = 0.1, shared_ptr<size_t> gens = NULL) {
   while (genlimit > 0 || genlimit == NOGENLIMIT) {
@@ -127,6 +134,7 @@ vector<S> genetic_algorithm(vector<vector<S>> population, function<int(vector<S>
   return population[0];
 }
 
+// Print table solutions from queen list
 void print_table_with_result(vector<NQueenState> solution, size_t gens, size_t table_size) {
   auto get_room_char = [solution](int k, int c) { return solution[c] == k + 1 ? "♛" : " "; };
   cout << "Generations: " << gens << endl;
