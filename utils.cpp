@@ -17,6 +17,20 @@ struct Problem {
       : initial(initial), goal(goal) {}
 };
 
+template <typename S, typename A>
+struct Game {
+  S initial, goal;
+
+  virtual int utility(const S &current) = 0;
+  virtual int to_move(const S &current) = 0;
+  virtual bool terminal_test(const S &current) = 0;
+  virtual S result(const S &state, const A &action) = 0;
+  virtual vector<A> actions(const S &current) = 0;
+
+  Game(S initial, S goal)
+      : initial(initial), goal(goal) {}
+};
+
 // Tree node implementation
 template <typename S, typename A>
 struct Node {
