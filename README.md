@@ -21,6 +21,6 @@ Usage: ...
     - [X] [Genetic Algorithm](genetic-algorithm.cpp) solving [N Queens Puzzle](https://en.wikipedia.org/wiki/Eight_queens_puzzle)
     - [ ] Simulated Annealing
 * Week 2
-    - [ ] Minimax
+    - [X] [Minimax](minimax.cpp) solving [Tic Tac Toe](https://en.wikipedia.org/wiki/Tic-tac-toe)
     - [ ] Expectiminimax
     - [ ] Monte Carlo Tree Search
