@@ -116,9 +116,8 @@ pair<int, shared_ptr<A>> max_search(Game<S, A> &game, S state, int alpha = numer
       alpha = max(v, alpha);
     }
 
-    if (value >= beta) {
+    if (value >= beta)
       return make_pair(value, action);
-    }
   }
 
   return make_pair(value, action);
