@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <memory>
 #include <vector>
 using namespace std;
@@ -14,6 +15,20 @@ struct Problem {
   virtual vector<A> actions(const S &current) = 0;
 
   Problem(S initial, S goal)
+      : initial(initial), goal(goal) {}
+};
+
+template <typename S, typename A>
+struct Game {
+  S initial, goal;
+
+  virtual int utility(const S &current) = 0;
+  virtual int to_move(const S &current) = 0;
+  virtual bool terminal_test(const S &current) = 0;
+  virtual S result(const S &state, const A &action) = 0;
+  virtual vector<A> actions(const S &current) = 0;
+
+  Game(S initial, S goal)
       : initial(initial), goal(goal) {}
 };
 
@@ -42,12 +57,12 @@ vector<shared_ptr<Node<S, A>>> expands(Problem<S, A> &problem, shared_ptr<Node<S
 }
 
 // Check if position is at bounds of the table
-bool at_bounds(int x, int y, size_t table_size) {
+bool at_bounds(size_t x, size_t y, size_t table_size) {
   return x >= 0 && x < table_size &&
          y >= 0 && y < table_size;
 }
 
-bool at_bounds(pair<int, int> position, size_t table_size) {
+bool at_bounds(pair<size_t, size_t> position, size_t table_size) {
   return position.first >= 0 && position.first < table_size &&
          position.second >= 0 && position.second < table_size;
 }
